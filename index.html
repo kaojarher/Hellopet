@@ -21,7 +21,7 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
   --ink:#15343F; --paper:#F3F8F8; --tile:#E2EDEF; --line:#C9DCE0; --muted:#5A7480;
-  --sun:#FFC93C; --sun-ink:#3A2A00;
+  --sun:#FFC93C; --sun-ink:#3A2A00; --bad:#E2574C; --good:#2fb384;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){ --ink:#E8F2F4; --paper:#162A33; --tile:#21404C; --line:#2E525F; --muted:#9DB8C0; }
@@ -36,7 +36,7 @@ body{
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
 }
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
-button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #FFC93C;outline-offset:2px}
+button:focus-visible,input:focus-visible,.pet:focus-visible{outline:3px solid #FFC93C;outline-offset:2px}
 
 /* ---------- 舞台 ---------- */
 #stage{position:fixed;inset:0;z-index:0;overflow:hidden;touch-action:none;background:#b7d4db}
@@ -49,15 +49,20 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
   content:"";position:absolute;left:70%;top:14%;width:46px;height:46px;border-radius:50%;
   background:#F4F1DA;box-shadow:-12px 4px 0 0 #0e1a2c inset,0 0 40px 10px rgba(244,241,218,.25);pointer-events:none;
 }
+#rain{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;overflow:hidden}
+#rain.on{opacity:1}
+#rain span{position:absolute;top:-8%;width:2px;height:4.5%;background:rgba(230,244,248,.55);border-radius:2px;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(118vh)}}
 
-/* ---------- 寵物 ---------- */
-#pet{position:absolute;left:0;top:0;z-index:2;will-change:transform;touch-action:none;cursor:grab;outline-offset:6px}
-#pet .shadow{position:absolute;left:14%;width:72%;aspect-ratio:10/1.2;bottom:-3%;
+/* ---------- 寵物群 ---------- */
+#petsLayer{position:fixed;inset:0;z-index:2}
+.pet{position:absolute;left:0;top:0;will-change:transform;touch-action:none;cursor:grab;outline-offset:6px}
+.pet .shadow{position:absolute;left:14%;width:72%;aspect-ratio:10/1.2;bottom:-3%;
   background:radial-gradient(ellipse at center,rgba(8,30,40,.38),rgba(8,30,40,0) 70%);pointer-events:none}
-#flip,#tilt,.anim{transform-origin:50% 100%}
-#pet img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;
+.p-flip,.p-tilt,.p-anim{transform-origin:50% 100%}
+.pet img.body{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;
   filter:drop-shadow(0 5px 7px rgba(8,30,40,.25))}
-.anim{animation:breathe 3.4s ease-in-out infinite}
+.p-anim{animation:breathe 3.4s ease-in-out infinite}
 @keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.018,.982)}}
 @keyframes hop{0%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7%) rotate(3deg)}100%{transform:translateY(0) rotate(-3deg)}}
 @keyframes jump{
@@ -72,33 +77,38 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 @keyframes wiggle{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-5deg) scale(1.05,.96)}75%{transform:rotate(5deg) scale(1.05,.96)}}
 @keyframes snooze{0%,100%{transform:rotate(-9deg) scale(1,.97)}50%{transform:rotate(-9deg) scale(1.02,.94)}}
 @keyframes shadowJump{0%,100%{transform:scale(1);opacity:1}45%{transform:scale(.6);opacity:.5}}
-#pet.walking .anim,#pet.running .anim{animation:hop .42s ease-in-out infinite}
-#pet.sleeping .anim{animation:snooze 3.6s ease-in-out infinite}
-#pet.sleeping img{filter:drop-shadow(0 5px 7px rgba(8,30,40,.25)) brightness(.88)}
-#pet.jump .anim{animation:jump .8s cubic-bezier(.3,.7,.4,1)}
-#pet.jump .shadow{animation:shadowJump .8s}
-#pet.squash .anim{animation:squash .7s ease-out}
-#pet.shake .anim{animation:shake .7s ease-in-out}
-#pet.munch .anim{animation:munch .26s ease-in-out 6}
-#pet.wiggle .anim{animation:wiggle .5s ease-in-out 2}
+.pet.walking .p-anim,.pet.running .p-anim{animation:hop .42s ease-in-out infinite}
+.pet.sleeping .p-anim{animation:snooze 3.6s ease-in-out infinite}
+.pet.sleeping img.body{filter:drop-shadow(0 5px 7px rgba(8,30,40,.25)) brightness(.88)}
+.pet.jump .p-anim{animation:jump .8s cubic-bezier(.3,.7,.4,1)}
+.pet.jump .shadow{animation:shadowJump .8s}
+.pet.squash .p-anim{animation:squash .7s ease-out}
+.pet.shake .p-anim{animation:shake .7s ease-in-out}
+.pet.munch .p-anim{animation:munch .26s ease-in-out 6}
+.pet.wiggle .p-anim{animation:wiggle .5s ease-in-out 2}
 .zzz{position:absolute;right:4%;top:-4%;display:none;font:700 22px/1 "Chocolate Classical Sans","Noto Sans TC",sans-serif;color:#fff;
   text-shadow:0 2px 6px rgba(8,30,40,.5);pointer-events:none}
 .zzz span{display:inline-block;animation:zfloat 2.2s ease-in-out infinite}
 .zzz span:nth-child(2){animation-delay:.4s;font-size:.8em}.zzz span:nth-child(3){animation-delay:.8s;font-size:.65em}
 @keyframes zfloat{0%{transform:translateY(6px);opacity:0}40%{opacity:1}100%{transform:translateY(-14px);opacity:0}}
-#pet.sleeping .zzz{display:block}
+.pet.sleeping .zzz{display:block}
+.costume{position:absolute;left:50%;top:-6%;font-size:38%;transform:translate(-50%,0);pointer-events:none;line-height:1;filter:drop-shadow(0 2px 3px rgba(8,30,40,.25))}
+.namechip{position:absolute;left:50%;bottom:-9%;transform:translateX(-50%);font-size:11px;font-weight:700;color:#fff;
+  background:rgba(21,52,63,.55);padding:2px 9px;border-radius:999px;white-space:nowrap;pointer-events:none}
+.heartbar{position:absolute;left:50%;top:-13%;transform:translateX(-50%);width:60%;height:5px;border-radius:3px;background:rgba(255,255,255,.5);overflow:hidden;pointer-events:none}
+.heartbar i{display:block;height:100%;background:#FF6B81;width:0%}
 
-/* ---------- 對話泡泡（永遠在角色上方或下方，不遮住角色） ---------- */
-#bubble{
+/* ---------- 對話泡泡 ---------- */
+.bubble{
   position:fixed;left:0;top:0;z-index:5;max-width:min(230px,70vw);padding:9px 14px;border-radius:16px;
   background:#fff;color:#15343F;pointer-events:none;opacity:0;transition:opacity .18s;
   font:400 15px/1.5 "Chocolate Classical Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   box-shadow:0 6px 18px rgba(8,30,40,.22);
 }
-#bubble.show{opacity:1}
-#bubble::after{content:"";position:absolute;left:var(--tx,50%);bottom:-6px;width:12px;height:12px;background:#fff;
+.bubble.show{opacity:1}
+.bubble::after{content:"";position:absolute;left:var(--tx,50%);bottom:-6px;width:12px;height:12px;background:#fff;
   transform:translateX(-50%) rotate(45deg);border-radius:2px}
-#bubble.below::after{bottom:auto;top:-6px}
+.bubble.below::after{bottom:auto;top:-6px}
 
 /* ---------- 特效 ---------- */
 #fx{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
@@ -108,16 +118,17 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 @keyframes rise{0%{transform:translate(-50%,0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--dx,0px)),-90px) scale(1.1);opacity:0}}
 
 /* ---------- 頂端狀態 / 按鈕 ---------- */
-#topbar{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;
+#topbar{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:8px;
   padding:calc(10px + env(safe-area-inset-top,0px)) 14px 0;pointer-events:none}
 #topbar>*{pointer-events:auto}
 #status{display:flex;align-items:center;gap:8px;padding:7px 13px 7px 11px;border-radius:999px;background:rgba(255,255,255,.82);
-  color:#15343F;font-size:13.5px;font-weight:500;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#status .dot{width:8px;height:8px;border-radius:50%;background:#2fb384}
+  color:#15343F;font-size:13px;font-weight:500;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);max-width:64vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#status .dot{width:8px;height:8px;border-radius:50%;background:#2fb384;flex:0 0 auto}
 #status[data-mode="sleep"] .dot{background:#8a9db5}
 #status[data-mode="walk"] .dot,#status[data-mode="follow"] .dot{background:#FFC93C}
 .round{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.88);color:#15343F;
-  box-shadow:0 3px 10px rgba(8,30,40,.18)}
+  box-shadow:0 3px 10px rgba(8,30,40,.18);flex:0 0 auto}
+.topright{display:flex;gap:8px}
 #menuBtn{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:6;
   display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;background:#15343F;color:#fff;font-weight:500;font-size:15px;
   box-shadow:0 6px 18px rgba(8,30,40,.3);transition:opacity .2s}
@@ -127,27 +138,41 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 .sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;z-index:8;background:var(--paper);color:var(--ink);
   border-radius:22px 22px 0 0;padding:10px 16px calc(16px + env(safe-area-inset-bottom,0px));
   box-shadow:0 -10px 40px rgba(8,30,40,.28);visibility:hidden;transform:translateY(104%);
-  transition:transform .26s ease,visibility 0s .26s;max-height:72dvh;overflow-y:auto;-webkit-user-select:text;user-select:text}
+  transition:transform .26s ease,visibility 0s .26s;max-height:78dvh;overflow-y:auto;-webkit-user-select:text;user-select:text}
 .sheet.open{visibility:visible;transform:none;transition:transform .26s ease}
 .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
-.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
 .sh-head strong{font-size:17px}
-.x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--tile)}
+.x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--tile);flex:0 0 auto}
+.pettabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:2px}
+.pettab{flex:0 0 auto;padding:7px 14px;border-radius:999px;background:var(--tile);font-size:13.5px;font-weight:500;white-space:nowrap}
+.pettab.on{background:var(--sun);color:var(--sun-ink)}
+.addpet{flex:0 0 auto;padding:7px 14px;border-radius:999px;background:var(--tile);font-size:13.5px;color:var(--muted)}
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.stat{flex:1;background:var(--tile);border-radius:12px;padding:8px 10px}
+.stat b{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.stat .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.stat .bar i{display:block;height:100%;border-radius:3px;background:var(--good)}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px 10px;border-radius:14px;background:var(--tile);font-size:12.5px;line-height:1.2;text-align:center}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px 10px;border-radius:14px;background:var(--tile);font-size:12px;line-height:1.2;text-align:center}
 .tile.on{background:var(--sun);color:var(--sun-ink)}
 .tile:active{transform:scale(.96)}
 .row{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:14px}
 .row>span{flex:0 0 76px;color:var(--muted)}
 .row input[type=range]{flex:1;accent-color:#e5a812;height:28px}
 .row input[type=text]{flex:1;min-width:0;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--tile);color:var(--ink);font:inherit}
+.secttl{margin:18px 0 8px;font-size:13px;color:var(--muted);font-weight:500}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap}
+.chiprow .chip2{padding:9px 13px;border-radius:12px;background:var(--tile);font-size:13.5px}
+.chiprow .chip2.on{background:var(--sun);color:var(--sun-ink)}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .btn{padding:12px 10px;border-radius:14px;background:var(--tile);font-weight:500;font-size:14.5px;text-align:center}
 .btn.primary{background:var(--sun);color:var(--sun-ink);grid-column:1/-1;font-size:15.5px}
 .btn.quiet{color:var(--muted)}
+.btn.danger{color:var(--bad)}
 
 /* ---------- 聊天 ---------- */
-#chat{max-height:52dvh;display:flex;flex-direction:column}
+#chat{max-height:56dvh;display:flex;flex-direction:column}
 #msgs{display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:110px;max-height:26dvh;padding:2px 2px 8px}
 .msg{max-width:82%;padding:9px 13px;border-radius:16px;font-size:14.5px;line-height:1.5;word-break:break-word}
 .msg.pet{align-self:flex-start;background:var(--tile);border-bottom-left-radius:5px}
@@ -163,9 +188,10 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
   padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);visibility:hidden;opacity:0;transition:opacity .2s,visibility 0s .2s;
   -webkit-user-select:none;user-select:none}
 #editor.open{visibility:visible;opacity:1;transition:opacity .2s}
-.ed-title{padding:14px 16px 8px;font-size:17px;font-weight:700}
+.ed-title{padding:14px 16px 4px;font-size:17px;font-weight:700}
+.ed-sub{padding:0 16px 8px;font-size:12.5px;color:var(--muted)}
 #edPrev{flex:1;min-height:0;margin:0 12px;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background:conic-gradient(#d3e0e3 25%,#f1f6f7 0 50%,#d3e0e3 0 75%,#f1f6f7 0) 0 0/22px 22px}
+  background:conic-gradient(#d3e0e3 25%,#f1f6f7 0 50%,#d3e0e3 0 75%,#f1f6f7 0) 0 0/22px 22px;position:relative}
 #edCanvas{display:block;touch-action:manipulation}
 .ed-ctrl{padding:8px 16px 4px}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--tile)}
@@ -175,38 +201,48 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 .ed-ctrl .row{margin-top:8px}
 .ed-btns{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:8px 16px 14px}
 #edBusy{position:absolute;left:0;right:0;top:50%;text-align:center;color:var(--muted);font-size:14px;display:none}
+.slotbar{display:flex;gap:6px;padding:0 16px 8px}
+.slotbtn{flex:1;padding:8px 4px;border-radius:12px;background:var(--tile);font-size:12.5px;text-align:center}
+.slotbtn.on{background:var(--sun);color:var(--sun-ink);font-weight:700}
+
+/* ---------- 小遊戲 ---------- */
+#game{position:fixed;inset:0;z-index:25;background:rgba(21,52,63,.92);color:#fff;display:none;flex-direction:column;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#game.on{display:flex}
+.g-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px;font-size:15px}
+#gArea{flex:1;position:relative;overflow:hidden;margin:0 12px 12px;border-radius:18px;background:rgba(255,255,255,.06)}
+.gitem{position:absolute;font-size:34px;transform:translate(-50%,-50%)}
+#gStart{margin:0 18px calc(18px + env(safe-area-inset-bottom,0px));padding:14px;border-radius:14px;background:#FFC93C;color:#3A2A00;font-weight:700;text-align:center;font-size:15.5px}
 
 /* ---------- 其他 ---------- */
 #away{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);z-index:3;display:none;text-align:center;padding:22px 26px;border-radius:20px;
-  background:rgba(255,255,255,.9);color:#15343F;box-shadow:0 10px 30px rgba(8,30,40,.25)}
+  background:rgba(255,255,255,.9);color:#15343F;box-shadow:0 10px 30px rgba(8,30,40,.25);max-width:82vw}
 #away.show{display:block}
 #away p{margin:0 0 14px;font-size:15.5px}
 #toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);z-index:30;max-width:84vw;
   padding:10px 16px;border-radius:12px;background:#15343F;color:#fff;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion: reduce){
-  .anim{animation:none}
+  .p-anim{animation:none}
   .zzz span{animation:none;opacity:1}
-  #pet.walking .anim,#pet.running .anim,#pet.sleeping .anim{animation:none}
+  .pet.walking .p-anim,.pet.running .p-anim,.pet.sleeping .p-anim{animation:none}
 }
 </style>
 </head>
 <body>
 
-<div id="stage"></div>
-<div id="pet" tabindex="0" role="button" aria-label="桌寵，點一下互動，長按開啟選單" style="display:none">
-  <div class="shadow"></div>
-  <div id="flip"><div id="tilt"><div class="anim"><img id="petImg" alt=""></div></div></div>
-  <div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
-</div>
-<div id="bubble" role="status" aria-live="polite"></div>
+<div id="stage"><div id="rain"></div></div>
+<div id="petsLayer"></div>
 <div id="fx"></div>
 
-<div id="away"><p>牠先回家休息了</p><button class="btn primary" id="callBtn" style="display:block;width:100%">叫牠出來</button></div>
+<div id="away"><p>寵物們都先回家休息了</p><button class="btn primary" id="callBtn" style="display:block;width:100%">叫牠們出來</button></div>
 
 <div id="topbar">
   <div id="status" data-mode="idle"><span class="dot"></span><span id="stText"></span></div>
-  <button class="round" id="photoBtn" aria-label="更換寵物照片"></button>
+  <div class="topright">
+    <button class="round" id="weatherBtn" aria-label="天氣"></button>
+    <button class="round" id="photoBtn" aria-label="更換寵物照片"></button>
+  </div>
 </div>
 <button id="menuBtn" aria-label="開啟選單"><span id="menuIco"></span>選單</button>
 
@@ -214,14 +250,24 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 <section class="sheet" id="sheet" aria-hidden="true" aria-label="寵物選單">
   <div class="grab"></div>
   <div class="sh-head"><strong>寵物選單</strong><button class="x" id="sheetClose" aria-label="關閉"></button></div>
+  <div class="pettabs" id="pettabs"></div>
+  <div class="stats" id="stats"></div>
   <div class="tiles" id="tiles"></div>
   <label class="row"><span>寵物大小</span><input type="range" id="sizeRange" min="90" max="380" step="1"></label>
   <label class="row"><span>寵物名字</span><input type="text" id="nameIn" maxlength="8" placeholder="幫牠取個名字"></label>
+  <div class="secttl">裝扮</div>
+  <div class="chiprow" id="costumeRow"></div>
+  <div class="secttl">提醒</div>
+  <div class="chiprow">
+    <button class="chip2" id="pomoBtn">番茄鐘 25 分</button>
+    <button class="chip2" id="waterBtn">整點喝水提醒</button>
+  </div>
   <div class="btns">
     <button class="btn primary" id="changePhoto">更換寵物照片</button>
     <button class="btn" id="changeBg">自選背景照片</button>
-    <button class="btn quiet" id="resetPet">恢復預設寵物</button>
-    <button class="btn quiet" id="exitPet" style="grid-column:1/-1">退出（讓牠回家休息）</button>
+    <button class="btn quiet" id="resetPet">恢復預設造型</button>
+    <button class="btn danger" id="removePet">移除這隻寵物</button>
+    <button class="btn quiet" id="exitPet" style="grid-column:1/-1">退出（讓牠們回家休息）</button>
   </div>
 </section>
 
@@ -237,6 +283,12 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 <!-- 照片編輯器 -->
 <section id="editor" aria-hidden="true" role="dialog" aria-label="調整寵物照片">
   <div class="ed-title">調整寵物照片</div>
+  <div class="ed-sub" id="edSub">選擇這張照片要用在哪個表情</div>
+  <div class="slotbar" id="slotbar">
+    <button class="slotbtn on" data-slot="idle">一般</button>
+    <button class="slotbtn" data-slot="happy">開心</button>
+    <button class="slotbtn" data-slot="sleepy">睡覺</button>
+  </div>
   <div id="edPrev"><canvas id="edCanvas" width="10" height="10"></canvas><div id="edBusy">處理中…</div></div>
   <div class="ed-ctrl">
     <div class="seg" id="edMode" role="group" aria-label="去背方式">
@@ -247,12 +299,20 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
     <label class="row"><span>邊緣柔化</span><input type="range" id="edEdge" min="0" max="4" value="1" step="1"></label>
     <label class="row"><span>貼紙白邊</span><input type="checkbox" id="edOutline" checked style="width:22px;height:22px;accent-color:#e5a812"></label>
   </div>
-  <div class="ed-btns"><button class="btn" id="edCancel">取消</button><button class="btn primary" id="edOk" style="grid-column:auto">使用這隻寵物</button></div>
+  <div class="ed-btns"><button class="btn" id="edCancel">取消</button><button class="btn primary" id="edOk" style="grid-column:auto">使用這張照片</button></div>
+</section>
+
+<!-- 小遊戲 -->
+<section id="game" aria-hidden="true" role="dialog" aria-label="接點心小遊戲">
+  <div class="g-head"><span id="gInfo">接住掉下來的點心！</span><button class="x" id="gClose" style="background:rgba(255,255,255,.15);color:#fff"></button></div>
+  <div id="gArea"></div>
+  <button id="gStart">開始遊戲（20 秒）</button>
 </section>
 
 <div id="toast" role="status"></div>
 <input type="file" id="petFile" accept="image/*" hidden>
 <input type="file" id="bgFile" accept="image/*" hidden>
+<input type="file" id="sndFile" accept="audio/*" hidden>
 
 <script>
 (function(){
@@ -260,12 +320,15 @@ button:focus-visible,input:focus-visible,#pet:focus-visible{outline:3px solid #F
 const $ = s => document.querySelector(s);
 const clamp = (v,a,b) => Math.min(Math.max(v,a),b);
 const pick = a => a[Math.floor(Math.random()*a.length)];
+const uid = () => 'p'+Math.random().toString(36).slice(2,9);
 const store = {
-  get(k,d){ try{ const v=localStorage.getItem('deskpet:'+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
-  set(k,v){ try{ localStorage.setItem('deskpet:'+k,JSON.stringify(v)); return true; }catch(e){ return false; } },
-  del(k){ try{ localStorage.removeItem('deskpet:'+k); }catch(e){} }
+  get(k,d){ try{ const v=localStorage.getItem('deskpet2:'+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem('deskpet2:'+k,JSON.stringify(v)); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem('deskpet2:'+k); }catch(e){} }
 };
 const vib = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
+let TOP = 56;
+function calcTop(){ TOP = (parseFloat(getComputedStyle(document.documentElement).paddingTop)||0) + 58; }
 
 /* ---------- 圖示 ---------- */
 const ICONS = {
@@ -281,16 +344,23 @@ const ICONS = {
   close:'<path d="M6 6l12 12M18 6L6 18"/>',
   dots:'<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>',
   send:'<path d="M4 12l16-8-6 16-3-7z"/>',
-  install:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/>'
+  install:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+  sound:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/>',
+  game:'<circle cx="12" cy="12" r="9"/><path d="M8 12h5M12 9v6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2 2M17.8 17.8l2 2M2 12h3M19 12h3M4.2 19.8l2-2M17.8 6.2l2-2"/>',
+  cloud:'<path d="M6 18a4 4 0 0 1 .5-8 5 5 0 0 1 9.6-1.2A4.5 4.5 0 0 1 17 18z"/>'
 };
-const icon = (n,s=22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+const icon = (n,s=22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
 $('#photoBtn').innerHTML = icon('photo');
+$('#weatherBtn').innerHTML = icon('cloud');
 $('#menuIco').innerHTML = icon('dots',20);
 $('#sheetClose').innerHTML = icon('close',18);
 $('#chatClose').innerHTML = icon('close',18);
 $('#chatSend').innerHTML = icon('send',20);
+$('#gClose').innerHTML = icon('close',18);
 
-/* ---------- 預設寵物（可換成自己的照片） ---------- */
+/* ---------- 預設寵物圖 ---------- */
 const DEFAULT_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210"><g stroke="#15343F" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">'
  + '<path d="M156 176c30-2 38-32 20-50" fill="none"/>'
  + '<path d="M44 66L38 16l42 24z" fill="#FFE2B8"/><path d="M156 66l6-50-42 24z" fill="#FFE2B8"/>'
@@ -306,43 +376,6 @@ const DEFAULT_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 21
  + '<g stroke="#15343F" stroke-width="2.6" stroke-linecap="round"><path d="M40 98l-16-3M40 106l-16 5M160 98l16-3M160 106l16 5"/></g></svg>';
 const DEFAULT_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(DEFAULT_SVG);
 
-/* ---------- 狀態 ---------- */
-const stage=$('#stage'), pet=$('#pet'), petImg=$('#petImg'), flip=$('#flip'), tilt=$('#tilt'), bubble=$('#bubble'), fx=$('#fx');
-const S = {
-  aspect:1.05, size:store.get('size', Math.round(clamp(innerWidth*0.5,120,230))),
-  x:0, y:0, dir:1, tilt:0, mode:'idle', target:null, goto:null,
-  locked:store.get('locked',false), name:store.get('name','小夥伴'), wall:store.get('wall',0),
-  bgimg:store.get('bgimg',null), hidden:false, photo:store.get('photo',null)
-};
-let TOP = 56;
-function calcTop(){ TOP = (parseFloat(getComputedStyle(document.documentElement).paddingTop)||0) + 58; }
-const petH = () => S.size*S.aspect;
-function clampPos(){
-  const w=S.size,h=petH();
-  S.x = clamp(S.x, -w*0.15, Math.max(-w*0.15, innerWidth - w*0.85));
-  S.y = clamp(S.y, TOP, Math.max(TOP, innerHeight - h - 6));
-}
-function render(){
-  pet.style.width = S.size+'px';
-  pet.style.transform = `translate(${S.x.toFixed(1)}px,${S.y.toFixed(1)}px)`;
-  flip.style.transform = `scaleX(${S.dir})`;
-  tilt.style.transform = `rotate(${S.tilt.toFixed(1)}deg)`;
-}
-function savePos(){ store.set('pos',{fx:S.x/innerWidth, fy:S.y/innerHeight}); }
-
-function setPetImage(src, first){
-  const im = new Image();
-  im.onload = () => {
-    const bottom = S.y + petH();
-    S.aspect = im.naturalHeight/im.naturalWidth || 1;
-    petImg.src = src;
-    if(!first){ S.y = bottom - petH(); }
-    clampPos(); render();
-  };
-  im.onerror = () => { if(src!==DEFAULT_IMG){ S.photo=null; store.del('photo'); setPetImage(DEFAULT_IMG,first); } };
-  im.src = src;
-}
-
 /* ---------- 台詞 ---------- */
 const L = {
   idle:['今天也要加油喔！','我在這裡陪你～','喝水了嗎？','摸魚時間到？','坐直一點，肩膀放鬆！','再滑五分鐘就去睡吧…','深呼吸，吸——吐——','有沒有想我？','我剛剛偷看了你的螢幕…','要不要起來動一動？'],
@@ -353,10 +386,13 @@ const L = {
   sleep:['晚安…Zzz','我先瞇一下…','別吵我…再五分鐘','Zzz…'],
   wake:['哈啊～醒了！','嗯？怎麼了？','我沒有睡著喔！'],
   follow:['點一下螢幕，我就跟過去！','我來啦！','等等我～'],
-  drop:['哇！放我下來～','這裡視野不錯！','嘿咻，落地！']
+  drop:['哇！放我下來～','這裡視野不錯！','嘿咻，落地！'],
+  hungry:['肚子好餓喔…','想吃東西了啦','咕嚕咕嚕…是我的肚子','有點餓，餵我一下嘛'],
+  tired:['好想睡覺…','眼皮好重…','讓我瞇一下吧','累了，陪我睡覺覺'],
+  levelup:['我們感情變更好了！','升級了！謝謝你一直陪我','等級提升！我更喜歡你了']
 };
 const JOKES = ['為什麼小貓不愛玩線上遊戲？因為牠怕被「滑鼠」抓到。','我問電腦：你會累嗎？它說：不會，我只會「當機」。','什麼東西越洗越髒？水。','小魚問小魚：你在幹嘛？小魚說：我在「魚」樂。'];
-function botReply(q){
+function botReply(q,pet){
   const t = q.toLowerCase();
   if(/笑話|好笑|逗我/.test(t)) return pick(JOKES);
   if(/你好|哈囉|嗨|hi|hello|安安/.test(t)) return pick(['嗨嗨～今天過得好嗎？','你來啦！我等你好久了','哈囉！有什麼想跟我說的嗎？']);
@@ -364,100 +400,187 @@ function botReply(q){
   if(/累|煩|難過|壓力|不開心|心情不好/.test(t)) return pick(['辛苦了，先深呼吸三次，我陪你','今天已經很努力了，休息一下也沒關係','抱抱～想說說發生什麼事嗎？']);
   if(/餓|吃|飯|餐/.test(t)) return pick(['我也餓了！從選單餵我吃的吧','吃點好吃的，心情就會變好','想吃什麼？我要草莓！']);
   if(/愛你|喜歡你|想你/.test(t)) return pick(['我也是！最喜歡你了','嘿嘿，害羞了…','那要一直陪我喔']);
-  if(/名字|叫什麼|你是誰/.test(t)) return `我是${S.name}，是住在你手機裡的小夥伴！`;
+  if(/名字|叫什麼|你是誰/.test(t)) return `我是${pet.name}，是住在你手機裡的小夥伴！`;
   if(/睡|睏|想睡/.test(t)) return '那就早點休息吧，我幫你守夜';
-  if(/天氣|下雨|熱|冷/.test(t)) return '我看不到窗外，但出門記得看一下天氣喔';
+  if(/天氣|下雨|熱|冷/.test(t)) return WEATHER.now ? `現在外面大概${Math.round(WEATHER.now.temp)}°C，${WEATHER.now.label}` : '我看不到窗外，你可以點右上角雲朵圖示問我天氣喔';
   if(/謝謝|感謝/.test(t)) return '不客氣～我最愛幫忙了';
   return pick(['嗯嗯，然後呢？','原來是這樣啊～','我聽著呢，繼續說','哇，真的嗎？','我不太懂，但我支持你！']);
 }
 
-/* ---------- 動作 ---------- */
-function play(name,ms){
-  pet.classList.remove('jump','squash','shake','munch','wiggle');
-  void pet.offsetWidth;
-  pet.classList.add(name);
-  clearTimeout(play.t);
-  play.t = setTimeout(()=>pet.classList.remove(name), ms);
+/* ---------- 裝扮 ---------- */
+const COSTUMES = [ ['hat','🎩','帽子'], ['bow','🎀','蝴蝶結'], ['scarf','🧣','圍巾'], ['shades','🕶️','墨鏡'], ['umbrella','☂️','雨傘'] ];
+
+/* ---------- Pet 類別 ---------- */
+const petsLayer = $('#petsLayer'), fx = $('#fx');
+let pets = [];
+let activeId = null;
+let globalHidden = false;
+
+function newPetState(opts){
+  opts = opts||{};
+  return {
+    id: opts.id || uid(),
+    name: opts.name || '小夥伴',
+    photos: opts.photos || {idle:null,happy:null,sleepy:null},
+    sound: opts.sound || null,
+    costume: opts.costume || [],
+    size: opts.size || Math.round(clamp(innerWidth*0.42,110,220)),
+    x: opts.x, y: opts.y,
+    dir:1, tilt:0, aspect:1.05, mode:'idle', target:null, goto:null, locked:false,
+    affection: opts.affection!=null?opts.affection:20,
+    hunger: opts.hunger!=null?opts.hunger:80,
+    energy: opts.energy!=null?opts.energy:80,
+    lastTick: opts.lastTick || Date.now()
+  };
 }
-let bubbleUntil=0;
-function say(text,ms=2800){
-  bubble.textContent = text; bubble.classList.add('show'); bubbleUntil = performance.now()+ms;
+
+function buildDom(state){
+  const el = document.createElement('div');
+  el.className='pet'; el.tabIndex=0; el.setAttribute('role','button');
+  el.setAttribute('aria-label', state.name+'，點一下互動，長按開啟選單');
+  el.innerHTML =
+    '<div class="shadow"></div>'+
+    '<div class="p-flip"><div class="p-tilt"><div class="p-anim"><img class="body" alt=""></div></div></div>'+
+    '<div class="costume"></div>'+
+    '<div class="heartbar"><i></i></div>'+
+    '<div class="namechip"></div>'+
+    '<div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>';
+  petsLayer.appendChild(el);
+  const bubble = document.createElement('div'); bubble.className='bubble'; bubble.setAttribute('role','status'); bubble.setAttribute('aria-live','polite');
+  document.body.appendChild(bubble);
+  return { el, img: el.querySelector('.body'), flip: el.querySelector('.p-flip'), costumeEl: el.querySelector('.costume'),
+    nameEl: el.querySelector('.namechip'), heartEl: el.querySelector('.heartbar i'), bubble };
 }
-function placeBubble(now){
-  if(!bubble.classList.contains('show')) return;
-  if(now>bubbleUntil || S.hidden){ bubble.classList.remove('show'); return; }
-  const bw=bubble.offsetWidth, bh=bubble.offsetHeight, h=petH();
-  const spaceAbove = S.y - TOP + 46, spaceBelow = innerHeight - (S.y+h) - 24;
+
+function petH(p){ return p.size*p.state.aspect; }
+function clampPos(p){
+  const w=p.state.size,h=petH(p);
+  p.state.x = clamp(p.state.x, -w*0.15, Math.max(-w*0.15, innerWidth - w*0.85));
+  p.state.y = clamp(p.state.y, TOP, Math.max(TOP, innerHeight - h - 6));
+}
+function currentPhoto(state){
+  if(state.mode==='sleep' && state.photos.sleepy) return state.photos.sleepy;
+  if(state.affection>=60 && state.photos.happy) return state.photos.happy;
+  return state.photos.idle || DEFAULT_IMG;
+}
+function applyPhoto(p, first){
+  const src = currentPhoto(p.state);
+  if(p._lastSrc===src) return;
+  const im = new Image();
+  im.onload = () => {
+    const bottom = p.state.y + petH(p);
+    p.state.aspect = im.naturalHeight/im.naturalWidth || 1;
+    p.dom.img.src = src; p._lastSrc = src;
+    if(!first){ p.state.y = bottom - petH(p); }
+    clampPos(p); render(p);
+  };
+  im.onerror = () => { if(src!==DEFAULT_IMG){ p.dom.img.src=DEFAULT_IMG; p._lastSrc=DEFAULT_IMG; } };
+  im.src = src;
+}
+function render(p){
+  const s=p.state;
+  p.dom.el.style.width = s.size+'px';
+  p.dom.el.style.transform = `translate(${s.x.toFixed(1)}px,${s.y.toFixed(1)}px)`;
+  p.dom.flip.style.transform = `scaleX(${s.dir}) rotate(${s.tilt.toFixed(1)}deg)`;
+  p.dom.nameEl.textContent = s.name;
+  p.dom.heartEl.style.width = clamp(s.affection,0,100)+'%';
+  p.dom.costumeEl.innerHTML = s.costume.map(id=>{ const c=COSTUMES.find(c=>c[0]===id); return c?c[1]:''; }).join(' ');
+}
+function play(p,name,ms){
+  const el=p.dom.el;
+  el.classList.remove('jump','squash','shake','munch','wiggle');
+  void el.offsetWidth; el.classList.add(name);
+  clearTimeout(p._playT); p._playT = setTimeout(()=>el.classList.remove(name), ms);
+}
+function say(p,text,ms){
+  ms = ms||2800;
+  p.dom.bubble.textContent=text; p.dom.bubble.classList.add('show'); p._bubbleUntil = performance.now()+ms;
+}
+function placeBubble(p, now){
+  const b=p.dom.bubble;
+  if(!b.classList.contains('show')) return;
+  if(now>p._bubbleUntil || globalHidden){ b.classList.remove('show'); return; }
+  const bw=b.offsetWidth, bh=b.offsetHeight, h=petH(p), s=p.state;
+  const spaceAbove = s.y - TOP + 46, spaceBelow = innerHeight - (s.y+h) - 24;
   const above = spaceAbove >= bh+12 || spaceAbove >= spaceBelow;
-  let by = above ? S.y - bh - 12 : S.y + h + 16;
+  let by = above ? s.y - bh - 12 : s.y + h + 16;
   by = clamp(by, TOP-40, innerHeight-bh-8);
-  const bx = clamp(S.x + S.size/2 - bw/2, 8, innerWidth-bw-8);
-  bubble.classList.toggle('below', !above);
-  bubble.style.setProperty('--tx', clamp(S.x+S.size/2-bx, 18, bw-18)+'px');
-  bubble.style.transform = `translate(${bx.toFixed(1)}px,${by.toFixed(1)}px)`;
+  const bx = clamp(s.x + s.size/2 - bw/2, 8, innerWidth-bw-8);
+  b.classList.toggle('below', !above);
+  b.style.setProperty('--tx', clamp(s.x+s.size/2-bx, 18, bw-18)+'px');
+  b.style.transform = `translate(${bx.toFixed(1)}px,${by.toFixed(1)}px)`;
 }
-function burst(n=5){
-  const cx=S.x+S.size/2, cy=S.y+petH()*0.2;
+function burst(p,n){
+  n=n||5; const s=p.state, cx=s.x+s.size/2, cy=s.y+petH(p)*0.2;
   for(let i=0;i<n;i++){
     const h=document.createElement('span'); h.className='heart'; h.textContent='♥';
-    h.style.left=(cx+(Math.random()-.5)*S.size*0.6)+'px'; h.style.top=(cy+Math.random()*20)+'px';
+    h.style.left=(cx+(Math.random()-.5)*s.size*0.6)+'px'; h.style.top=(cy+Math.random()*20)+'px';
     h.style.setProperty('--dx',((Math.random()-.5)*40)+'px'); h.style.animationDelay=(i*90)+'ms';
     fx.appendChild(h); setTimeout(()=>h.remove(),1700);
   }
 }
 const STATUS={idle:'待機中',walk:'散步中',sleep:'睡覺中',follow:'跟隨中'};
-function updateUI(){
-  $('#stText').textContent = `${S.name}・${STATUS[S.mode]}`;
-  $('#status').dataset.mode = S.mode;
-  $('#chatTitle').textContent = `和${S.name}聊聊天`;
-  document.querySelectorAll('.tile[data-id]').forEach(b=>{
-    const id=b.dataset.id;
-    const on = (id==='walk'&&S.mode==='walk')||(id==='sleep'&&S.mode==='sleep')||(id==='follow'&&S.mode==='follow')||(id==='lock'&&S.locked);
-    b.classList.toggle('on',on); if(b.dataset.toggle) b.setAttribute('aria-pressed',on);
-  });
+function gainAffection(p, n){
+  const before = Math.floor(p.state.affection/100);
+  p.state.affection = clamp(p.state.affection+n,0,999);
+  const after = Math.floor(p.state.affection/100);
+  if(after>before){ say(p, pick(L.levelup),3000); burst(p,8); toast(`${p.state.name} 的好感等級提升到 Lv.${after+1}！`); }
+  savePets();
 }
-function setMode(m){
-  const prev=S.mode;
-  if(prev==='walk'||prev==='follow') S.dir=1;
-  S.mode=m; S.target=null;
-  pet.classList.toggle('sleeping',m==='sleep');
-  pet.classList.toggle('walking',m==='walk');
-  if(m!=='follow') pet.classList.remove('running');
+function setMode(p,m){
+  const s=p.state, prev=s.mode;
+  if(prev==='walk'||prev==='follow') s.dir=1;
+  s.mode=m; s.target=null;
+  p.dom.el.classList.toggle('sleeping',m==='sleep');
+  p.dom.el.classList.toggle('walking',m==='walk');
+  if(m!=='follow') p.dom.el.classList.remove('running');
+  applyPhoto(p);
   updateUI();
 }
-function wake(){ if(S.mode==='sleep'){ setMode('idle'); say(pick(L.wake)); play('jump',800); return true; } return false; }
-let lastTap=-1;
-function tap(){
-  if(wake()) return;
+function wake(p){ if(p.state.mode==='sleep'){ setMode(p,'idle'); say(p,pick(L.wake)); play(p,'jump',800); return true; } return false; }
+let lastTapAnim=-1;
+function tapPet(p){
+  if(wake(p)) return;
   const acts=[['jump',800],['squash',700],['shake',700]];
-  let i; do{ i=Math.floor(Math.random()*acts.length); }while(i===lastTap&&acts.length>1); lastTap=i;
-  play(acts[i][0],acts[i][1]); say(pick(L.tap)); vib(8);
+  let i; do{ i=Math.floor(Math.random()*acts.length); }while(i===lastTapAnim&&acts.length>1); lastTapAnim=i;
+  play(p,acts[i][0],acts[i][1]); say(p,pick(L.tap)); gainAffection(p,1); vib(8);
 }
+function patPet(p){ if(p.state.mode==='sleep') setMode(p,'idle'); play(p,'wiggle',1000); burst(p,6); say(p,pick(L.pat)); gainAffection(p,3); vib(12); }
+function feedPet(p){
+  if(p.state.mode==='sleep') setMode(p,'idle');
+  closeSheets();
+  const f=document.createElement('div'); f.className='food'; f.textContent=pick(['🍙','🍓','🐟','🍪','🍩','🥕','🍉']);
+  f.style.left=(p.state.x+p.state.size/2)+'px'; f.style.top=(p.state.y+petH(p)*0.35-150)+'px';
+  fx.appendChild(f); requestAnimationFrame(()=>requestAnimationFrame(()=>f.classList.add('go')));
+  setTimeout(()=>{ f.remove(); play(p,'munch',1600); burst(p,4); say(p,pick(L.feed));
+    p.state.hunger = clamp(p.state.hunger+25,0,100); gainAffection(p,2); vib(15); applyPhoto(p); },720);
+}
+function playSound(p){
+  if(!p.state.sound){ $('#sndFile').click(); return; }
+  try{ const a=new Audio(p.state.sound); a.play().catch(()=>{}); }catch(e){}
+  play(p,'wiggle',900);
+}
+
 const ACT = {
-  chat(){ openChat(); },
-  pat(){ if(S.mode==='sleep') setMode('idle'); play('wiggle',1000); burst(6); say(pick(L.pat)); vib(12); },
-  feed(){
-    if(S.mode==='sleep') setMode('idle');
-    closeSheets();
-    const f=document.createElement('div'); f.className='food'; f.textContent=pick(['🍙','🍓','🐟','🍪','🍩','🥕','🍉']);
-    f.style.left=(S.x+S.size/2)+'px'; f.style.top=(S.y+petH()*0.35-150)+'px';
-    fx.appendChild(f); requestAnimationFrame(()=>requestAnimationFrame(()=>f.classList.add('go')));
-    setTimeout(()=>{ f.remove(); play('munch',1600); burst(4); say(pick(L.feed)); vib(15); },720);
-  },
-  walk(){ if(S.mode==='walk'){ setMode('idle'); } else { setMode('walk'); S.dir=Math.random()<.5?1:-1; say(pick(L.walk)); } closeSheets(); },
-  sleep(){ if(S.mode==='sleep'){ wake(); } else { setMode('sleep'); say(pick(L.sleep)); } closeSheets(); },
-  follow(){ if(S.mode==='follow'){ setMode('idle'); } else { setMode('follow'); say(pick(L.follow),3200); } closeSheets(); },
-  lock(){ S.locked=!S.locked; store.set('locked',S.locked); updateUI(); toast(S.locked?'位置已鎖定，不會被誤拖':'已解除鎖定'); },
+  chat(p){ openChat(p); },
+  pat(p){ patPet(p); },
+  feed(p){ feedPet(p); },
+  walk(p){ if(p.state.mode==='walk'){ setMode(p,'idle'); } else { setMode(p,'walk'); p.state.dir=Math.random()<.5?1:-1; say(p,pick(L.walk)); } closeSheets(); },
+  sleep(p){ if(p.state.mode==='sleep'){ wake(p); } else { setMode(p,'sleep'); say(p,pick(L.sleep)); } closeSheets(); },
+  follow(p){ if(p.state.mode==='follow'){ setMode(p,'idle'); } else { setMode(p,'follow'); say(p,pick(L.follow),3200); } closeSheets(); },
+  lock(p){ p.state.locked=!p.state.locked; savePets(); updateUI(); toast(p.state.locked?'位置已鎖定，不會被誤拖':'已解除鎖定'); },
   wall(){ nextWall(); },
-  install(){ closeSheets(); doInstall(); }
+  install(){ closeSheets(); doInstall(); },
+  sound(p){ playSound(p); },
+  game(p){ closeSheets(); openGame(p); }
 };
 const TILES=[
   ['chat','chat','陪我聊天'],['pat','heart','摸摸頭'],['feed','bowl','餵吃的'],['walk','walk','走路'],
-  ['sleep','moon','睡覺'],['follow','finger','跟隨手指'],['lock','lock','鎖定位置'],['wall','layers','換背景'],
-  ['install','install','安裝到桌面']
+  ['sleep','moon','睡覺'],['follow','finger','跟隨手指'],['sound','sound','播放聲音'],['game','game','小遊戲'],
+  ['lock','lock','鎖定位置'],['wall','layers','換背景'],['install','install','安裝到桌面']
 ];
 $('#tiles').innerHTML = TILES.map(([id,ic,lb])=>`<button class="tile" data-id="${id}" ${['walk','sleep','follow','lock'].includes(id)?'data-toggle="1"':''}>${icon(ic)}<span>${lb}</span></button>`).join('');
-$('#tiles').addEventListener('click',e=>{ const b=e.target.closest('.tile'); if(b) ACT[b.dataset.id](); });
+$('#tiles').addEventListener('click',e=>{ const b=e.target.closest('.tile'); if(b && active()) ACT[b.dataset.id](active()); else if(b && ACT[b.dataset.id].length===0) ACT[b.dataset.id](); });
 
 /* ---------- 背景 ---------- */
 const WALLS=[
@@ -465,194 +588,406 @@ const WALLS=[
   'linear-gradient(180deg,#0e1a2c 0%,#22375a 58%,#3a5a80 100%)',
   'linear-gradient(180deg,#e8f4ee 0%,#cfe6db 100%)'
 ];
+const stage=$('#stage');
+let wallIdx=store.get('wall',0), bgimg=store.get('bgimg',null);
 function applyWall(){
-  if(S.wall===3 && !S.bgimg) S.wall=0;
-  stage.dataset.wall=S.wall;
-  stage.style.background = S.wall===3 ? `center / cover no-repeat url("${S.bgimg}")` : WALLS[S.wall];
-  store.set('wall',S.wall);
+  if(wallIdx===3 && !bgimg) wallIdx=0;
+  stage.dataset.wall=wallIdx;
+  stage.style.background = wallIdx===3 ? `center / cover no-repeat url("${bgimg}")` : WALLS[wallIdx];
+  store.set('wall',wallIdx);
 }
-function nextWall(){ const max=S.bgimg?3:2; S.wall = S.wall>=max?0:S.wall+1; applyWall(); }
+function nextWall(){ const max=bgimg?3:2; wallIdx = wallIdx>=max?0:wallIdx+1; applyWall(); }
+
+/* ---------- 雨效果 ---------- */
+const rainEl=$('#rain');
+function setRain(on){
+  rainEl.classList.toggle('on',on);
+  if(on && !rainEl.childElementCount){
+    for(let i=0;i<40;i++){
+      const s=document.createElement('span');
+      s.style.left=(Math.random()*100)+'%'; s.style.animationDuration=(0.6+Math.random()*0.6)+'s';
+      s.style.animationDelay=(Math.random()*1)+'s'; rainEl.appendChild(s);
+    }
+  }
+}
+
+/* ---------- 天氣 ---------- */
+const WEATHER = { now:null };
+function weatherLabel(code){
+  if(code===0) return '晴朗';
+  if(code<=3) return '多雲';
+  if(code<=48) return '有霧';
+  if(code<=67) return '下雨';
+  if(code<=77) return '下雪';
+  if(code<=82) return '陣雨';
+  if(code>=95) return '雷雨';
+  return '陰天';
+}
+function fetchWeather(){
+  if(!('geolocation' in navigator)){ toast('這個瀏覽器不支援定位，無法取得天氣'); return; }
+  toast('正在取得目前位置的天氣…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    try{
+      const {latitude,longitude}=pos.coords;
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`;
+      const res=await fetch(url); const data=await res.json();
+      const temp=data.current.temperature_2m, code=data.current.weather_code, label=weatherLabel(code);
+      WEATHER.now={temp,code,label};
+      const rain = code>=51 && code<=82 || code>=95;
+      setRain(rain);
+      toast(`現在 ${Math.round(temp)}°C，${label}`);
+      const p=active();
+      if(p) say(p, rain?'外面在下雨，記得帶傘～':(temp>=28?'外面好熱，要多喝水喔':'現在天氣還不錯～'),3600);
+    }catch(err){ toast('抓不到天氣資料，請稍後再試'); }
+  },()=>{ toast('沒有取得定位權限，無法查天氣'); },{timeout:8000});
+}
+$('#weatherBtn').addEventListener('click',fetchWeather);
 
 /* ---------- 面板 ---------- */
-const sheet=$('#sheet'), chat=$('#chat'), menuBtn=$('#menuBtn');
+const sheet=$('#sheet'), chatSheet=$('#chat'), menuBtn=$('#menuBtn');
 let openEl=null;
 function liftPet(el){
+  const p=active(); if(!p) return;
   setTimeout(()=>{
-    const top = innerHeight - el.offsetHeight, bottom = S.y + petH();
-    if(bottom > top-10){ S.goto={x:S.x, y:Math.max(TOP, top-10-petH())}; }
+    const top = innerHeight - el.offsetHeight, bottom = p.state.y + petH(p);
+    if(bottom > top-10){ p.state.goto={x:p.state.x, y:Math.max(TOP, top-10-petH(p))}; }
   },40);
 }
 function openSheet(el){
   closeSheets(true); el.classList.add('open'); el.setAttribute('aria-hidden','false'); openEl=el; menuBtn.classList.add('hide'); liftPet(el);
 }
 function closeSheets(keep){
-  [sheet,chat].forEach(e=>{ e.classList.remove('open'); e.setAttribute('aria-hidden','true'); });
+  [sheet,chatSheet].forEach(e=>{ e.classList.remove('open'); e.setAttribute('aria-hidden','true'); });
   openEl=null; if(!keep) menuBtn.classList.remove('hide');
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
 }
-function openMenu(){ if(S.hidden) return; $('#sizeRange').value=S.size; $('#nameIn').value=S.name; updateUI(); openSheet(sheet); }
+function active(){ return pets.find(p=>p.state.id===activeId) || pets[0] || null; }
+function renderPetTabs(){
+  const tabs=$('#pettabs');
+  tabs.innerHTML = pets.map(p=>`<button class="pettab ${p.state.id===activeId?'on':''}" data-id="${p.state.id}">${p.state.name}</button>`).join('')
+    + (pets.length<3 ? `<button class="addpet" id="addPetBtn">${icon('plus',14)} 新增寵物</button>` : '');
+}
+$('#pettabs').addEventListener('click',e=>{
+  const b=e.target.closest('.pettab'); if(b){ activeId=b.dataset.id; openMenu(); return; }
+  if(e.target.closest('#addPetBtn')) addPet();
+});
+function renderStats(p){
+  const box=$('#stats');
+  const items=[['好感度',p.state.affection>999?999:Math.min(100,p.state.affection%100 || (p.state.affection>=100?100:p.state.affection)),'#FF6B81'],
+    ['飽足','',''],['精神','','']];
+  box.innerHTML =
+    stat('好感', clamp(p.state.affection,0,100), '#FF6B81') +
+    stat('飽足', clamp(p.state.hunger,0,100), '#2fb384') +
+    stat('精神', clamp(p.state.energy,0,100), '#5f97a5');
+}
+function stat(label,val,color){
+  return `<div class="stat"><b>${label} ${Math.round(val)}%</b><div class="bar"><i style="width:${val}%;background:${color}"></i></div></div>`;
+}
+function renderCostumes(p){
+  $('#costumeRow').innerHTML = COSTUMES.map(([id,em,lb])=>
+    `<button class="chip2 ${p.state.costume.includes(id)?'on':''}" data-c="${id}">${em} ${lb}</button>`).join('');
+}
+$('#costumeRow').addEventListener('click',e=>{
+  const b=e.target.closest('.chip2'); if(!b) return; const p=active(); if(!p) return;
+  const id=b.dataset.c, i=p.state.costume.indexOf(id);
+  if(i>=0) p.state.costume.splice(i,1); else p.state.costume.push(id);
+  savePets(); renderCostumes(p); render(p);
+});
+function openMenu(){
+  if(globalHidden || !active()) return;
+  const p=active();
+  $('#sizeRange').value=p.state.size; $('#nameIn').value=p.state.name;
+  renderPetTabs(); renderStats(p); renderCostumes(p); updateUI();
+  openSheet(sheet);
+}
 menuBtn.addEventListener('click',openMenu);
 $('#sheetClose').addEventListener('click',()=>closeSheets());
 $('#chatClose').addEventListener('click',()=>closeSheets());
 
-/* 大小、名字 */
-function setSize(v){
-  const cx=S.x+S.size/2, bottom=S.y+petH();
-  S.size=clamp(Math.round(v),90,380); S.x=cx-S.size/2; S.y=bottom-petH(); clampPos();
-  clearTimeout(setSize.t); setSize.t=setTimeout(()=>store.set('size',S.size),300);
+function updateUI(){
+  const p=active();
+  $('#stText').textContent = p ? `${p.state.name}・${STATUS[p.state.mode]}` : '寵物休息中';
+  $('#status').dataset.mode = p?p.state.mode:'idle';
+  $('#chatTitle').textContent = p ? `和${p.state.name}聊聊天` : '聊聊天';
+  document.querySelectorAll('.tile[data-id]').forEach(b=>{
+    const id=b.dataset.id; if(!p) return;
+    const on = (id==='walk'&&p.state.mode==='walk')||(id==='sleep'&&p.state.mode==='sleep')||(id==='follow'&&p.state.mode==='follow')||(id==='lock'&&p.state.locked);
+    b.classList.toggle('on',on); if(b.dataset.toggle) b.setAttribute('aria-pressed',on);
+  });
 }
-$('#sizeRange').addEventListener('input',e=>setSize(+e.target.value));
-$('#nameIn').addEventListener('input',e=>{ S.name=e.target.value.trim()||'小夥伴'; store.set('name',S.name); updateUI(); });
+
+/* 大小、名字 */
+function setSize(p,v){
+  const cx=p.state.x+p.state.size/2, bottom=p.state.y+petH(p);
+  p.state.size=clamp(Math.round(v),90,380); p.state.x=cx-p.state.size/2; p.state.y=bottom-petH(p); clampPos(p);
+  clearTimeout(setSize.t); setSize.t=setTimeout(savePets,300);
+}
+$('#sizeRange').addEventListener('input',e=>{ const p=active(); if(p) setSize(p,+e.target.value); });
+$('#nameIn').addEventListener('input',e=>{ const p=active(); if(!p) return; p.state.name=e.target.value.trim()||'小夥伴'; savePets(); updateUI(); renderPetTabs(); });
 
 /* ---------- 聊天 ---------- */
-const msgs=$('#msgs'), chatIn=$('#chatIn');
-function addMsg(t,who){ const d=document.createElement('div'); d.className='msg '+who; d.textContent=t; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
-function openChat(){
-  if(!msgs.children.length) addMsg(`嗨，我是${S.name}！想聊什麼都可以。`,'pet');
-  openSheet(chat);
+const msgsEl=$('#msgs'), chatIn=$('#chatIn');
+function addMsg(t,who){ const d=document.createElement('div'); d.className='msg '+who; d.textContent=t; msgsEl.appendChild(d); msgsEl.scrollTop=msgsEl.scrollHeight; }
+function openChat(p){
+  msgsEl.innerHTML='';
+  addMsg(`嗨，我是${p.state.name}！想聊什麼都可以。`,'pet');
+  openSheet(chatSheet);
 }
 $('#chips').innerHTML = ['講個笑話','今天好累','肚子餓了','你叫什麼名字？'].map(t=>`<button class="chip">${t}</button>`).join('');
 function sendChat(text){
+  const p=active(); if(!p) return;
   const t=(text||chatIn.value).trim(); if(!t) return; chatIn.value=''; addMsg(t,'me');
-  setTimeout(()=>{ addMsg(botReply(t),'pet'); play(pick(['jump','squash','wiggle']),900); },420+Math.random()*420);
+  setTimeout(()=>{ addMsg(botReply(t,p.state),'pet'); play(p,pick(['jump','squash','wiggle']),900); gainAffection(p,1); },420+Math.random()*420);
 }
 $('#chips').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(c) sendChat(c.textContent); });
 $('#chatSend').addEventListener('click',()=>sendChat());
 chatIn.addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); sendChat(); } });
 
-/* ---------- 指標互動：拖動 / 點擊 / 長按 / 雙指縮放 ---------- */
+/* ---------- 指標互動：拖動 / 點擊 / 長按 / 雙指縮放 / 多寵物命中測試 ---------- */
+function hitTest(x,y){
+  for(let i=pets.length-1;i>=0;i--){
+    const p=pets[i], r=p.dom.el.getBoundingClientRect();
+    if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom) return p;
+  }
+  return null;
+}
 const pointers=new Map();
-let drag=null, pinch=null, followPtr=null, ignoreTap=false;
+let drag=null, pinch=null, ignoreTap=false;
 const pdist = () => { const [a,b]=[...pointers.values()]; return Math.hypot(a.x-b.x,a.y-b.y); };
 stage.addEventListener('pointerdown',e=>{
-  if(S.hidden) return;
+  if(globalHidden) return;
   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{ stage.setPointerCapture(e.pointerId); }catch(_){}
   if(pointers.size===2){
-    if(drag){ clearTimeout(drag.timer); drag=null; pet.classList.remove('running'); }
-    pinch={d0:Math.max(pdist(),1), s0:S.size}; ignoreTap=true; return;
+    if(drag){ clearTimeout(drag.timer); drag.el.classList.remove('running'); drag=null; }
+    const hp = hitTest(e.clientX,e.clientY);
+    pinch={d0:Math.max(pdist(),1), s0: hp?hp.state.size:(active()?active().state.size:150), pet: hp||active()};
+    ignoreTap=true; return;
   }
   if(pointers.size>2) return;
   ignoreTap=false;
-  const hit = pet.contains(e.target) || e.target===pet;
+  const hit = hitTest(e.clientX,e.clientY);
   if(!hit){
-    const inRect = (()=>{ const r=pet.getBoundingClientRect(); return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom; })();
-    if(!inRect){
-      if(openEl){ closeSheets(); return; }
-      if(S.mode==='follow'){ S.target={x:e.clientX,y:e.clientY}; followPtr=e.pointerId; }
-      return;
-    }
+    if(openEl){ closeSheets(); return; }
+    const followers = pets.filter(p=>p.state.mode==='follow');
+    followers.forEach(p=>{ p.state.target={x:e.clientX,y:e.clientY}; });
+    return;
   }
-  drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,ox:S.x,oy:S.y,moved:false,long:false,
+  activeId = hit.state.id;
+  drag={id:e.pointerId,pet:hit,sx:e.clientX,sy:e.clientY,ox:hit.state.x,oy:hit.state.y,moved:false,long:false,el:hit.dom.el,
     timer:setTimeout(()=>{ if(drag && !drag.moved){ drag.long=true; vib(18); openMenu(); } },520)};
 });
 stage.addEventListener('pointermove',e=>{
   if(!pointers.has(e.pointerId)) return;
   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(pinch && pointers.size>=2){
-    const v=clamp(pinch.s0*pdist()/pinch.d0,90,380); setSize(v); $('#sizeRange').value=S.size; return;
+  if(pinch && pointers.size>=2 && pinch.pet){
+    const v=clamp(pinch.s0*pdist()/pinch.d0,90,380); setSize(pinch.pet,v); if(pinch.pet.state.id===activeId) $('#sizeRange').value=pinch.pet.state.size; return;
   }
-  if(followPtr===e.pointerId && S.mode==='follow'){ S.target={x:e.clientX,y:e.clientY}; }
   if(!drag || drag.id!==e.pointerId) return;
-  const dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
+  const p=drag.pet, dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
   if(!drag.moved && Math.hypot(dx,dy)>8){
     drag.moved=true; clearTimeout(drag.timer);
-    if(S.locked){ toast('位置已鎖定，可在選單解除'); }
-    else { if(S.mode!=='idle') setMode('idle'); S.goto=null; pet.classList.add('running'); }
+    if(p.state.locked){ toast('位置已鎖定，可在選單解除'); }
+    else { if(p.state.mode!=='idle') setMode(p,'idle'); p.state.goto=null; p.dom.el.classList.add('running'); }
   }
-  if(drag.moved && !S.locked){
-    const nx=drag.ox+dx, vx=nx-S.x; S.x=nx; S.y=drag.oy+dy; clampPos();
-    if(Math.abs(vx)>1.2) S.dir=vx>0?1:-1;
-    S.tilt=clamp(S.tilt*0.6+vx*1.2,-16,16);
+  if(drag.moved && !p.state.locked){
+    const nx=drag.ox+dx, vx=nx-p.state.x; p.state.x=nx; p.state.y=drag.oy+dy; clampPos(p);
+    if(Math.abs(vx)>1.2) p.state.dir=vx>0?1:-1;
+    p.state.tilt=clamp(p.state.tilt*0.6+vx*1.2,-16,16);
   }
 });
 function endPointer(e){
   pointers.delete(e.pointerId);
-  if(followPtr===e.pointerId) followPtr=null;
   if(pointers.size<2) pinch=null;
   if(drag && drag.id===e.pointerId){
-    const d=drag; drag=null; clearTimeout(d.timer); pet.classList.remove('running');
+    const d=drag, p=d.pet; drag=null; clearTimeout(d.timer); p.dom.el.classList.remove('running');
     if(!d.long){
-      if(!d.moved){ if(!ignoreTap && e.type==='pointerup') tap(); }
-      else if(!S.locked){ play('squash',600); if(Math.random()<.35) say(pick(L.drop)); savePos(); }
+      if(!d.moved){ if(!ignoreTap && e.type==='pointerup') tapPet(p); }
+      else if(!p.state.locked){ play(p,'squash',600); if(Math.random()<.35) say(p,pick(L.drop)); savePets(); }
     }
   }
   if(pointers.size===0) ignoreTap=false;
 }
 stage.addEventListener('pointerup',endPointer);
 stage.addEventListener('pointercancel',endPointer);
-pet.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); tap(); } if(e.key==='m'||e.key==='M') openMenu(); });
+petsLayer.addEventListener('keydown',e=>{
+  const el=e.target.closest('.pet'); if(!el) return;
+  const p=pets.find(p=>p.dom.el===el); if(!p) return;
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); activeId=p.state.id; tapPet(p); }
+  if(e.key==='m'||e.key==='M'){ activeId=p.state.id; openMenu(); }
+});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 /* ---------- 主迴圈 ---------- */
 let last=performance.now();
 function loop(now){
   const dt=Math.min(3,(now-last)/16.67); last=now;
-  if(!S.hidden){
-    const dragging = drag && drag.moved && !S.locked;
-    if(!dragging){
-      if(S.goto){
-        const k=1-Math.pow(0.86,dt); S.x+=(S.goto.x-S.x)*k; S.y+=(S.goto.y-S.y)*k;
-        if(Math.hypot(S.goto.x-S.x,S.goto.y-S.y)<0.6) S.goto=null;
+  if(!globalHidden){
+    pets.forEach(p=>{
+      const s=p.state;
+      const dragging = drag && drag.pet===p && drag.moved && !s.locked;
+      if(!dragging){
+        if(s.goto){
+          const k=1-Math.pow(0.86,dt); s.x+=(s.goto.x-s.x)*k; s.y+=(s.goto.y-s.y)*k;
+          if(Math.hypot(s.goto.x-s.x,s.goto.y-s.y)<0.6) s.goto=null;
+        }
+        if(s.mode==='walk'){
+          const sp=(0.9+s.size/260)*dt; s.x+=s.dir*sp;
+          const minX=-s.size*0.15, maxX=innerWidth-s.size*0.85;
+          if(s.x>=maxX){ s.x=maxX; s.dir=-1; } else if(s.x<=minX){ s.x=minX; s.dir=1; }
+          s.tilt*=Math.pow(0.8,dt);
+        } else if(s.mode==='follow' && s.target){
+          const tx=s.target.x-s.size/2, ty=s.target.y-petH(p)-26;
+          const dx=tx-s.x, dy=ty-s.y, k=1-Math.pow(0.91,dt);
+          s.x+=dx*k; s.y+=dy*k; clampPos(p);
+          if(Math.abs(dx)>8) s.dir=dx>0?1:-1;
+          const moving=Math.hypot(dx*k,dy*k)>0.7; p.dom.el.classList.toggle('running',moving);
+          s.tilt*=Math.pow(0.8,dt);
+        } else {
+          s.tilt*=Math.pow(0.86,dt); if(Math.abs(s.tilt)<0.05) s.tilt=0;
+        }
       }
-      if(S.mode==='walk'){
-        const sp=(0.9+S.size/260)*dt; S.x+=S.dir*sp;
-        const minX=-S.size*0.15, maxX=innerWidth-S.size*0.85;
-        if(S.x>=maxX){ S.x=maxX; S.dir=-1; } else if(S.x<=minX){ S.x=minX; S.dir=1; }
-        S.tilt*=Math.pow(0.8,dt);
-      } else if(S.mode==='follow' && S.target){
-        const tx=S.target.x-S.size/2, ty=S.target.y-petH()-26;
-        const dx=tx-S.x, dy=ty-S.y, k=1-Math.pow(0.91,dt);
-        S.x+=dx*k; S.y+=dy*k; clampPos();
-        if(Math.abs(dx)>8) S.dir=dx>0?1:-1;
-        const moving=Math.hypot(dx*k,dy*k)>0.7; pet.classList.toggle('running',moving);
-        S.tilt*=Math.pow(0.8,dt);
-      } else {
-        S.tilt*=Math.pow(0.86,dt); if(Math.abs(S.tilt)<0.05) S.tilt=0;
-      }
-    }
-    render(); placeBubble(now);
+      render(p); placeBubble(p,now);
+    });
   }
   requestAnimationFrame(loop);
 }
 
-/* ---------- 隨機自言自語 ---------- */
+/* ---------- 狀態衰減（每分鐘）與隨機自言自語 ---------- */
+function tickStats(){
+  const nowT=Date.now();
+  pets.forEach(p=>{
+    const mins = (nowT-p.state.lastTick)/60000;
+    if(mins>0.4){
+      p.state.hunger = clamp(p.state.hunger - mins*0.6, 0, 100);
+      p.state.energy = p.state.mode==='sleep' ? clamp(p.state.energy + mins*2.2,0,100) : clamp(p.state.energy - mins*0.4,0,100);
+      p.state.lastTick = nowT;
+    }
+  });
+  savePets();
+}
+setInterval(tickStats, 60000);
 setInterval(()=>{
-  if(S.hidden||S.mode!=='idle'||openEl||drag) return;
-  if(Math.random()<0.6){ say(pick(L.idle)); if(Math.random()<0.4) play(pick(['jump','shake','wiggle']),900); }
+  if(globalHidden||openEl||drag) return;
+  pets.forEach(p=>{
+    if(p.state.mode!=='idle') return;
+    if(p.state.hunger<25 && Math.random()<0.5){ say(p,pick(L.hungry)); return; }
+    if(p.state.energy<25 && Math.random()<0.5){ say(p,pick(L.tired)); return; }
+    if(Math.random()<0.45){ say(p,pick(L.idle)); if(Math.random()<0.4) play(p,pick(['jump','shake','wiggle']),900); }
+  });
 },9000);
 
 /* ---------- 退出 / 叫出來 ---------- */
 $('#exitPet').addEventListener('click',()=>{
-  closeSheets(); setMode('idle'); S.hidden=true; pet.style.display='none'; bubble.classList.remove('show'); $('#away').classList.add('show');
+  closeSheets(); const p=active(); if(p) setMode(p,'idle');
+  globalHidden=true; petsLayer.style.display='none'; document.querySelectorAll('.bubble').forEach(b=>b.classList.remove('show')); $('#away').classList.add('show');
 });
 $('#callBtn').addEventListener('click',()=>{
-  S.hidden=false; pet.style.display=''; $('#away').classList.remove('show'); render();
-  play('jump',800); burst(4); say('我回來啦！');
+  globalHidden=false; petsLayer.style.display=''; $('#away').classList.remove('show');
+  pets.forEach(p=>{ render(p); });
+  const p=active(); if(p){ play(p,'jump',800); burst(p,4); say(p,'我們回來啦！'); }
+});
+
+/* ---------- 新增 / 移除寵物 ---------- */
+function addPet(){
+  if(pets.length>=3){ toast('最多同時養 3 隻寵物'); return; }
+  const st = newPetState({ x: innerWidth*0.3+pets.length*40, y: innerHeight*0.4 });
+  const dom = buildDom(st);
+  const p = { state: st, dom, _lastSrc:null };
+  pets.push(p); clampPos(p); applyPhoto(p,true); render(p); activeId=st.id; savePets();
+  renderPetTabs(); renderStats(p); renderCostumes(p); updateUI();
+  say(p,'嗨！我是新來的夥伴～'); play(p,'jump',800);
+}
+$('#removePet').addEventListener('click',()=>{
+  const p=active(); if(!p) return;
+  if(pets.length<=1){ toast('至少要留一隻寵物喔'); return; }
+  p.dom.el.remove(); p.dom.bubble.remove();
+  pets = pets.filter(x=>x!==p);
+  activeId = pets[0].state.id; savePets(); renderPetTabs(); renderStats(active()); renderCostumes(active()); updateUI();
+  toast('已移除這隻寵物');
+});
+$('#resetPet').addEventListener('click',()=>{
+  const p=active(); if(!p) return;
+  p.state.photos={idle:null,happy:null,sleepy:null}; p._lastSrc=null; savePets(); applyPhoto(p); toast('已恢復預設造型'); play(p,'jump',800);
 });
 
 /* ---------- Toast ---------- */
 let toastT;
-function toast(m,ms=2400){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms); }
+function toast(m,ms){ ms=ms||2400; const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms); }
 
 /* ---------- PWA 安裝 ---------- */
 let deferredPrompt=null;
 const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; });
-addEventListener('appinstalled', ()=>{ deferredPrompt=null; toast('安裝完成！可以在桌面或主畫面找到牠了'); });
+addEventListener('appinstalled', ()=>{ deferredPrompt=null; toast('安裝完成！可以在桌面或主畫面找到牠們了'); });
 function doInstall(){
   if(isStandalone()){ toast('已經是安裝好的桌寵囉！'); return; }
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; });
-    return;
-  }
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; }); return; }
   if(isIOS()){ toast('點下方分享圖示 ⬆️，選「加入主畫面」即可安裝',4400); return; }
   toast('請點瀏覽器選單，選擇「安裝應用程式」或「加入主畫面」',4400);
 }
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+
+/* ---------- 番茄鐘 / 喝水提醒 ---------- */
+let pomoTimer=null, pomoEnd=0, waterTimer=null;
+function startPomo(mins){
+  clearInterval(pomoTimer); pomoEnd=Date.now()+mins*60000;
+  toast(`番茄鐘開始，${mins} 分鐘後提醒你`);
+  pomoTimer=setInterval(()=>{
+    if(Date.now()>=pomoEnd){
+      clearInterval(pomoTimer); const p=active();
+      if(p){ say(p,'時間到！休息一下吧～',4000); play(p,'shake',700); vib([40,60,40]); }
+      toast('番茄鐘時間到！');
+    }
+  },1000);
+}
+$('#pomoBtn').addEventListener('click',()=>{
+  if(pomoTimer){ clearInterval(pomoTimer); pomoTimer=null; toast('番茄鐘已取消'); $('#pomoBtn').classList.remove('on'); return; }
+  startPomo(25); $('#pomoBtn').classList.add('on');
+});
+$('#waterBtn').addEventListener('click',()=>{
+  if(waterTimer){ clearInterval(waterTimer); waterTimer=null; $('#waterBtn').classList.remove('on'); toast('喝水提醒已關閉'); return; }
+  $('#waterBtn').classList.add('on'); toast('已開啟整點喝水提醒');
+  waterTimer=setInterval(()=>{ const p=active(); if(p){ say(p,'該喝水囉，補充一下水分～',4000); } },3600000);
+});
+
+/* ---------- 小遊戲：接點心 ---------- */
+const gameEl=$('#game'), gArea=$('#gArea'), gInfo=$('#gInfo'), gStart=$('#gStart');
+let gameRunning=false, gameScore=0, gameSpawn=null, gameEnd=null, gamePet=null;
+function openGame(p){ gamePet=p||active(); gameEl.classList.add('on'); gameEl.setAttribute('aria-hidden','false'); gArea.innerHTML=''; gInfo.textContent='接住掉下來的點心！'; gStart.style.display='block'; gStart.textContent='開始遊戲（20 秒）'; }
+$('#gClose').addEventListener('click',()=>{ stopGame(); gameEl.classList.remove('on'); gameEl.setAttribute('aria-hidden','true'); });
+gStart.addEventListener('click',()=>{ if(!gameRunning) startGame(); });
+function startGame(){
+  gameRunning=true; gameScore=0; gStart.style.display='none'; gInfo.textContent='分數：0';
+  const foods=['🍓','🍩','🍙','🍪','🥕'];
+  gameSpawn=setInterval(()=>{
+    if(!gameRunning) return;
+    const it=document.createElement('div'); it.className='gitem'; it.textContent=pick(foods);
+    const w=gArea.clientWidth||280; const x=20+Math.random()*(w-40);
+    it.style.left=x+'px'; it.style.top='-30px'; gArea.appendChild(it);
+    const dur=1600+Math.random()*900, start=performance.now(), h=gArea.clientHeight||400;
+    function fall(now){
+      if(!it.isConnected) return;
+      const t=(now-start)/dur;
+      if(t>=1){ it.remove(); return; }
+      it.style.top=(-30+t*(h+30))+'px';
+      requestAnimationFrame(fall);
+    }
+    requestAnimationFrame(fall);
+    it.addEventListener('pointerdown',()=>{
+      if(!it.isConnected) return; it.remove(); gameScore++; gInfo.textContent='分數：'+gameScore; vib(10);
+    });
+  },550);
+  gameEnd=setTimeout(()=>endGame(),20000);
+}
+function stopGame(){ gameRunning=false; clearInterval(gameSpawn); clearTimeout(gameEnd); gArea.innerHTML=''; }
+function endGame(){
+  stopGame(); gInfo.textContent=`遊戲結束！分數：${gameScore}`;
+  gStart.style.display='block'; gStart.textContent='再玩一次';
+  if(gamePet && gameScore>0){ gainAffection(gamePet, Math.min(20,Math.round(gameScore*0.8))); toast(`${gamePet.state.name} 的好感度增加了！`); }
 }
 
 /* ---------- 檔案讀取 ---------- */
@@ -662,6 +997,9 @@ function readImage(file){
     fr.onload=()=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('decode')); im.src=fr.result; };
     fr.readAsDataURL(file);
   });
+}
+function readDataUrl(file){
+  return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=()=>rej(new Error('read')); fr.onload=()=>res(fr.result); fr.readAsDataURL(file); });
 }
 $('#photoBtn').addEventListener('click',()=>$('#petFile').click());
 $('#changePhoto').addEventListener('click',()=>$('#petFile').click());
@@ -673,15 +1011,20 @@ $('#bgFile').addEventListener('change',async e=>{
     const im=await readImage(f); const sc=Math.min(1,1100/Math.max(im.naturalWidth,im.naturalHeight));
     const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*sc); c.height=Math.round(im.naturalHeight*sc);
     c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-    S.bgimg=c.toDataURL('image/jpeg',0.8); S.wall=3; applyWall();
-    if(!store.set('bgimg',S.bgimg)) toast('背景已套用，但瀏覽器無法儲存，下次需重選');
+    bgimg=c.toDataURL('image/jpeg',0.8); wallIdx=3; applyWall();
+    if(!store.set('bgimg',bgimg)) toast('背景已套用，但瀏覽器無法儲存，下次需重選');
     else toast('已換成你的背景');
   }catch(err){ toast('這張照片無法讀取，請換一張'); }
 });
-$('#resetPet').addEventListener('click',()=>{ S.photo=null; store.del('photo'); setPetImage(DEFAULT_IMG); toast('已恢復預設寵物'); play('jump',800); });
+$('#sndFile').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0]; e.target.value=''; const p=active(); if(!f||!p) return;
+  if(f.size>1500000){ toast('音檔太大了，請用短一點的片段（建議 5 秒內）'); return; }
+  try{ const url=await readDataUrl(f); p.state.sound=url; if(!savePets()) toast('聲音已套用，但瀏覽器無法儲存'); else toast('已加入專屬聲音'); playSound(p); }
+  catch(err){ toast('這個音檔無法讀取'); }
+});
 
-/* ---------- 照片編輯器（去背 + 貼紙白邊） ---------- */
-const ED={src:null,data:null,mode:'auto',tol:60,edge:1,outline:true,autoKey:[255,255,255],key:null,seed:null,out:null,pad:0,bx:0,by:0,raf:0};
+/* ---------- 照片編輯器（去背 + 貼紙白邊 + 多表情插槽） ---------- */
+const ED={src:null,data:null,mode:'auto',tol:60,edge:1,outline:true,key:null,seed:null,autoKey:[255,255,255],out:null,pad:0,bx:0,by:0,raf:0,slot:'idle',petRef:null};
 const edEl=$('#editor'), edCanvas=$('#edCanvas'), edPrev=$('#edPrev'), edHint=$('#edHint');
 const HINTS={
   auto:'照片背景單純時效果最好。去不乾淨，就直接點一下照片上的背景色。',
@@ -689,7 +1032,14 @@ const HINTS={
   pick:'請點一下照片上要去除的背景顏色。',
   none:'保留整張照片，適合本來就是透明背景的 PNG。'
 };
+const SLOT_LABEL={idle:'一般表情：日常待機時顯示',happy:'開心表情：好感度較高、被摸頭時顯示',sleepy:'睡覺表情：進入睡覺模式時顯示'};
+$('#slotbar').addEventListener('click',e=>{
+  const b=e.target.closest('.slotbtn'); if(!b) return;
+  document.querySelectorAll('.slotbtn').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  ED.slot=b.dataset.slot; $('#edSub').textContent=SLOT_LABEL[ED.slot];
+});
 async function openEditor(file){
+  ED.petRef = active(); if(!ED.petRef) return;
   let im; try{ im=await readImage(file); }catch(e){ toast('這張照片無法讀取，請換一張'); return; }
   const sc=Math.min(1,560/Math.max(im.naturalWidth,im.naturalHeight));
   const w=Math.max(2,Math.round(im.naturalWidth*sc)), h=Math.max(2,Math.round(im.naturalHeight*sc));
@@ -699,7 +1049,9 @@ async function openEditor(file){
   let clear=0; const d=ED.data.data; for(let i=3;i<d.length;i+=4) if(d[i]<250) clear++;
   ED.autoKey=cornerKey(); ED.seed=null; ED.key=null;
   ED.mode = clear>w*h*0.03 ? 'none' : 'auto';
-  ED.tol=60; ED.edge=1; ED.outline=true;
+  ED.tol=60; ED.edge=1; ED.outline=true; ED.slot='idle';
+  document.querySelectorAll('.slotbtn').forEach(x=>x.classList.toggle('on',x.dataset.slot==='idle'));
+  $('#edSub').textContent=SLOT_LABEL.idle;
   $('#edTol').value=ED.tol; $('#edEdge').value=ED.edge; $('#edOutline').checked=true;
   syncSeg();
   edEl.classList.add('open'); edEl.setAttribute('aria-hidden','false'); closeSheets();
@@ -769,7 +1121,6 @@ function processED(){
       if(ED.mode==='green' && a[i]<1 && o[p+1]>Math.max(o[p],o[p+2])) o[p+1]=Math.max(o[p],o[p+2]);
     }
   }
-  /* 邊界框 */
   let minX=w,minY=h,maxX=-1,maxY=-1,cnt=0;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){ if(o[(y*w+x)*4+3]>24){ cnt++; if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; } }
   const empty = cnt < n*0.004;
@@ -821,34 +1172,60 @@ edCanvas.addEventListener('pointerdown',e=>{
 function closeEditor(){ edEl.classList.remove('open'); edEl.setAttribute('aria-hidden','true'); ED.src=null; ED.data=null; }
 $('#edCancel').addEventListener('click',closeEditor);
 $('#edOk').addEventListener('click',()=>{
-  if(!ED.out) return;
+  if(!ED.out || !ED.petRef) return;
   const fc=ED.out, sc=Math.min(1,512/Math.max(fc.width,fc.height));
   const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(fc.width*sc)); c.height=Math.max(1,Math.round(fc.height*sc));
   c.getContext('2d').drawImage(fc,0,0,c.width,c.height);
   const url=c.toDataURL('image/png');
-  S.photo=url; const ok=store.set('photo',url);
-  setPetImage(url); closeEditor();
-  if(!ok) toast('已換上新寵物，但瀏覽器無法儲存，下次開啟需重選');
-  else toast('換好了！');
-  setTimeout(()=>{ play('jump',800); burst(5); say('哇，這是新的我嗎？'); },300);
+  const p=ED.petRef;
+  p.state.photos[ED.slot]=url; p._lastSrc=null;
+  const ok=savePets();
+  applyPhoto(p); closeEditor();
+  if(!ok) toast('已換上新照片，但瀏覽器無法儲存，下次開啟需重選');
+  else toast(ED.slot==='idle'?'換好了！':'這個表情也設定好了！');
+  if(ED.slot==='idle') setTimeout(()=>{ play(p,'jump',800); burst(p,5); say(p,'哇，這是新的我嗎？'); },300);
 });
-addEventListener('resize',()=>{ calcTop(); clampPos(); render(); if(edEl.classList.contains('open')) fitCanvas(); });
+addEventListener('resize',()=>{ calcTop(); pets.forEach(p=>{ clampPos(p); render(p); }); if(edEl.classList.contains('open')) fitCanvas(); });
+
+/* ---------- 儲存 / 讀取 ---------- */
+function savePets(){
+  const data = pets.map(p=>({
+    id:p.state.id,name:p.state.name,photos:p.state.photos,sound:p.state.sound,costume:p.state.costume,
+    size:p.state.size,x:p.state.x,y:p.state.y,affection:p.state.affection,hunger:p.state.hunger,energy:p.state.energy,lastTick:p.state.lastTick
+  }));
+  return store.set('pets',data) && store.set('activeId',activeId);
+}
 
 /* ---------- 啟動 ---------- */
 calcTop();
-const sp=store.get('pos',null);
-S.x = sp ? sp.fx*innerWidth : (innerWidth-S.size)/2;
-S.y = sp ? sp.fy*innerHeight : innerHeight*0.44-petH()/2;
-applyWall(); updateUI();
-setPetImage(S.photo||DEFAULT_IMG,true);
-pet.style.display='';
-clampPos(); render();
+applyWall();
+const saved = store.get('pets',null);
+if(saved && saved.length){
+  saved.forEach((sv,i)=>{
+    const st = newPetState(sv);
+    if(st.x==null || st.y==null){ st.x=(innerWidth-st.size)/2+i*30; st.y=innerHeight*0.44-st.size*1.05/2; }
+    const dom = buildDom(st);
+    const p={state:st,dom,_lastSrc:null};
+    pets.push(p); clampPos(p); applyPhoto(p,true); render(p);
+  });
+  activeId = store.get('activeId', pets[0].state.id);
+  if(!pets.find(p=>p.state.id===activeId)) activeId = pets[0].state.id;
+} else {
+  const st = newPetState({ x:(innerWidth-160)/2, y:innerHeight*0.44-84 });
+  const dom = buildDom(st);
+  const p = {state:st,dom,_lastSrc:null};
+  pets.push(p); clampPos(p); applyPhoto(p,true); render(p);
+  activeId = st.id; savePets();
+}
 requestAnimationFrame(loop);
 setTimeout(()=>{
   const hr=new Date().getHours();
-  say(hr<5?'這麼晚了還沒睡？':hr<11?'早安！今天也一起加油':hr<14?'午安！吃飯了嗎？':hr<18?'下午好～喝口水吧':'晚上好！今天辛苦了');
-  play('jump',800);
-  if(!S.photo) setTimeout(()=>toast('點右上角相片圖示，換成你專屬的寵物照片'),2200);
+  const p=active();
+  if(p){
+    say(p, hr<5?'這麼晚了還沒睡？':hr<11?'早安！今天也一起加油':hr<14?'午安！吃飯了嗎？':hr<18?'下午好～喝口水吧':'晚上好！今天辛苦了');
+    play(p,'jump',800);
+    if(!p.state.photos.idle) setTimeout(()=>toast('點右上角相片圖示，換成你專屬的寵物照片'),2200);
+  }
 },500);
 })();
 </script>
