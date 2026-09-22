@@ -653,8 +653,8 @@ function liftPet(el){
     if(bottom > top-10){ p.state.goto={x:p.state.x, y:Math.max(TOP, top-10-petH(p))}; }
   },40);
 }
-function openSheet(el){
-  closeSheets(true); el.classList.add('open'); el.setAttribute('aria-hidden','false'); openEl=el; menuBtn.classList.add('hide'); liftPet(el);
+function openSheet(el, skipLift){
+  closeSheets(true); el.classList.add('open'); el.setAttribute('aria-hidden','false'); openEl=el; menuBtn.classList.add('hide'); if(!skipLift) liftPet(el);
 }
 function closeSheets(keep){
   [sheet,chatSheet].forEach(e=>{ e.classList.remove('open'); e.setAttribute('aria-hidden','true'); });
@@ -698,7 +698,7 @@ function openMenu(){
   const p=active();
   $('#sizeRange').value=p.state.size; $('#nameIn').value=p.state.name;
   renderPetTabs(); renderStats(p); renderCostumes(p); updateUI();
-  openSheet(sheet);
+  openSheet(sheet, true);
 }
 menuBtn.addEventListener('click',openMenu);
 $('#sheetClose').addEventListener('click',()=>closeSheets());
